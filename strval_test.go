@@ -5,207 +5,70 @@ import (
 	"testing"
 )
 
-// Tests StringValidationOption MustBeAlphaNumeric()
+func assertOption(t *testing.T, option StringValidationOption, str, strName string, errExpected bool) {
+	t.Helper()
+	err := option(str, strName)
+	if (err != nil) != errExpected {
+		t.Errorf("got error %v, wantErr %v", err, errExpected)
+	}
+	if err != nil && errExpected && strName != "" && !strings.Contains(err.Error(), strName) {
+		t.Errorf("error %q does not contain strName %q", err.Error(), strName)
+	}
+}
+
 func TestMustBeAlphaNumeric(t *testing.T) {
-	// Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only spaces",
-			str:         "   ",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only special characters",
-			str:         "!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only numbers",
-			str:         "1234567890",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only uppercase letters",
-			str:         "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only lowercase letters",
-			str:         "abcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only numbers and uppercase letters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only numbers and lowercase letters",
-			str:         "1234567890abcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only uppercase and lowercase letters",
-			str:         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only numbers, uppercase and lowercase letters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with numbers, uppercase and lowercase letters and special characters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with numbers, uppercase and lowercase letters and special characters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: true,
-		},
+		{"empty string", "", "str", true},
+		{"only spaces", "   ", "str", true},
+		{"only special characters", "!@#$%^&*()_+", "str", true},
+		{"only numbers", "1234567890", "str", false},
+		{"only uppercase", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "str", false},
+		{"only lowercase", "abcdefghijklmnopqrstuvwxyz", "str", false},
+		{"numbers and uppercase", "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", "str", false},
+		{"numbers and lowercase", "1234567890abcdefghijklmnopqrstuvwxyz", "str", false},
+		{"uppercase and lowercase", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", "str", false},
+		{"numbers, uppercase, and lowercase", "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", "str", false},
+		{"alphanumeric with special characters", "abc123!@#", "str", true},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustBeAlphaNumeric()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustBeAlphaNumeric() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustBeAlphaNumeric() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustBeAlphaNumeric(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustContainNumbers()
 func TestMustContainNumbers(t *testing.T) {
-	// Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only spaces",
-			str:         "   ",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only special characters",
-			str:         "!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only numbers",
-			str:         "1234567890",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only uppercase letters",
-			str:         "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only lowercase letters",
-			str:         "abcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only numbers and uppercase letters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only numbers and lowercase letters",
-			str:         "1234567890abcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only uppercase and lowercase letters",
-			str:         "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only numbers, uppercase and lowercase letters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with numbers, uppercase and lowercase letters and special characters",
-			str:         "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: false,
-		},
+		{"empty string", "", "str", true},
+		{"only spaces", "   ", "str", true},
+		{"only special characters", "!@#$%^&*()_+", "str", true},
+		{"only numbers", "1234567890", "str", false},
+		{"only uppercase", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "str", true},
+		{"only lowercase", "abcdefghijklmnopqrstuvwxyz", "str", true},
+		{"numbers and uppercase", "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ", "str", false},
+		{"numbers and lowercase", "1234567890abcdefghijklmnopqrstuvwxyz", "str", false},
+		{"uppercase and lowercase", "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", "str", true},
+		{"all character types", "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz", "str", false},
+		{"alphanumeric with special characters", "abc123!@#", "str", false},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustContainNumbers()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustContainNumbers() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustContainNumbers() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustContainNumbers(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustContainAtLeastOne()
 func TestMustContainAtLeastOne(t *testing.T) {
-	//  Test cases
 	tests := []struct {
 		name        string
 		str         string
@@ -213,261 +76,93 @@ func TestMustContainAtLeastOne(t *testing.T) {
 		query       []rune
 		errExpected bool
 	}{
-		{
-			name:        "empty string with empty query",
-			str:         "",
-			strName:     "str",
-			query:       []rune{},
-			errExpected: false,
-		},
-		{
-			name:        "string with empty query",
-			str:         "abc",
-			query:       []rune{},
-			errExpected: false,
-		},
-		{
-			name:        "string without matching query characters",
-			str:         "abc",
-			query:       []rune{'d', 'e', 'f'},
-			errExpected: true,
-		},
-		{
-			name:        "string with matching query characters",
-			str:         "abc",
-			query:       []rune{'c'},
-			errExpected: false,
-		},
-		{
-			name: "empty string with query characters",
-			str:  "",
-			query: []rune{
-				'c',
-			},
-			errExpected: true,
-		},
+		{"empty string with empty query", "", "str", []rune{}, false},
+		{"string with empty query", "abc", "str", []rune{}, false},
+		{"no matching characters", "abc", "str", []rune{'d', 'e', 'f'}, true},
+		{"matching characters", "abc", "str", []rune{'c'}, false},
+		{"empty string with query", "", "str", []rune{'c'}, true},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustContainAtLeastOne(tt.query)(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustContainAtLeastOne() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustContainAtLeastOne() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustContainAtLeastOne(tt.query), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustContainLowercaseLetter()
 func TestMustContainLowercaseLetter(t *testing.T) {
-	//  Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with no lowercase letters",
-			str:         "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with lowercase letters",
-			str:         "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: false,
-		},
+		{"empty string", "", "str", true},
+		{"no lowercase letters", "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+", "str", true},
+		{"with lowercase letters", "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()_+", "str", false},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustContainLowercaseLetter()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustContainLowercaseLetter() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustContainLowercaseLetter() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustContainLowercaseLetter(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustContainUppercaseLetter()
 func TestMustContainUppercaseLetter(t *testing.T) {
-	//  Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with no uppercase letters",
-			str:         "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with uppercase letters",
-			str:         "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+",
-			strName:     "str",
-			errExpected: false,
-		},
+		{"empty string", "", "str", true},
+		{"no uppercase letters", "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()_+", "str", true},
+		{"with uppercase letters", "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+", "str", false},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustContainUppercaseLetter()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustContainUppercaseLetter() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustContainUppercaseLetter() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustContainUppercaseLetter(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustMustOnlyContainPrintableCharacters()
 func TestMustOnlyContainPrintableCharacters(t *testing.T) {
-	//  Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only printable characters",
-			str:         "abc",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with non printable characters",
-			str:         "abc\t\n",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with emojis",
-			str:         "😀️",
-			strName:     "str",
-			errExpected: false,
-		},
+		{"empty string", "", "str", false},
+		{"only printable characters", "abc", "str", false},
+		{"with non-printable characters", "abc\t\n", "str", true},
+		{"emojis", "😀️", "str", false},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustOnlyContainPrintableCharacters()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustNotContainNonPrintableCharacters() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustNotContainNonPrintableCharacters() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustOnlyContainPrintableCharacters(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Test StringValidationOption MustOnlyContainASCIICharacters()
 func TestMustOnlyContainASCIICharacters(t *testing.T) {
-	//  Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with only ASCII characters",
-			str:         "abcDEF\t\n!@#123",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with emojis",
-			str:         "😀️",
-			strName:     "str",
-			errExpected: true,
-		},
+		{"empty string", "", "str", false},
+		{"only ASCII characters", "abcDEF\t\n!@#123", "str", false},
+		{"with emojis", "😀️", "str", true},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustOnlyContainASCIICharacters()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustOnlyContainASCIICharacters() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustOnlyContainASCIICharacters() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustOnlyContainASCIICharacters(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustHaveMinLengthOf()
 func TestMustHaveMinLengthOf(t *testing.T) {
-	// Test cases
 	tests := []struct {
 		name        string
 		str         string
@@ -475,44 +170,17 @@ func TestMustHaveMinLengthOf(t *testing.T) {
 		minLength   int
 		errExpected bool
 	}{
-		{
-			name:        "string that meets min length",
-			str:         "abc",
-			strName:     "str",
-			minLength:   3,
-			errExpected: false,
-		},
-		{
-			name:        "string that does not meet min length",
-			str:         "ab",
-			strName:     "str",
-			minLength:   3,
-			errExpected: true,
-		},
+		{"meets min length", "abc", "str", 3, false},
+		{"below min length", "ab", "str", 3, true},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustHaveMinLengthOf(tt.minLength)(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustHaveMinLengthOf() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustHaveMinLengthOf() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustHaveMinLengthOf(tt.minLength), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustHaveMaxLengthOf()
 func TestMustHaveMaxLengthOf(t *testing.T) {
-	// Test cases
 	tests := []struct {
 		name        string
 		str         string
@@ -520,104 +188,37 @@ func TestMustHaveMaxLengthOf(t *testing.T) {
 		maxLength   int
 		errExpected bool
 	}{
-		{
-			name:        "string that meets max length",
-			str:         "abc",
-			strName:     "str",
-			maxLength:   3,
-			errExpected: false,
-		},
-		{
-			name:        "string that does not meet max length",
-			str:         "abcd",
-			strName:     "str",
-			maxLength:   3,
-			errExpected: true,
-		},
+		{"meets max length", "abc", "str", 3, false},
+		{"exceeds max length", "abcd", "str", 3, true},
 	}
-
-	// Run test cases
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustHaveMaxLengthOf(tt.maxLength)(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustHaveMaxLengthOf() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustHaveMaxLengthOf() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustHaveMaxLengthOf(tt.maxLength), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustNotBeEmpty()
 func TestMustNotBeEmpty(t *testing.T) {
-	// Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with only spaces",
-			str:         "   ",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string that is not empty",
-			str:         "abc",
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with tab",
-			str:         "\t",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with newline",
-			str:         "\n",
-			strName:     "str",
-			errExpected: true,
-		},
+		{"empty string", "", "str", true},
+		{"only spaces", "   ", "str", true},
+		{"not empty", "abc", "str", false},
+		{"only tab", "\t", "str", true},
+		{"only newline", "\n", "str", true},
 	}
-
-	// Run tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustNotBeEmpty()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustNotBeEmpty() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustNotBeEmpty() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustNotBeEmpty(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustNotContain()
-func TestMustNotContain(t *testing.T) {
-	// Test cases
+func TestMustNotContainAnyOf(t *testing.T) {
 	tests := []struct {
 		name        string
 		str         string
@@ -625,200 +226,57 @@ func TestMustNotContain(t *testing.T) {
 		query       []rune
 		errExpected bool
 	}{
-		{
-			name:        "empty string with empty query",
-			str:         "",
-			strName:     "str",
-			query:       []rune{},
-			errExpected: false,
-		},
-		{
-			name:        "string with empty query",
-			str:         "abc",
-			query:       []rune{},
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string without matching query characters",
-			str:         "abc",
-			query:       []rune{'d', 'e', 'f'},
-			strName:     "str",
-			errExpected: false,
-		},
-		{
-			name:        "string with matching query characters",
-			str:         "abc",
-			query:       []rune{'c'},
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:    "empty string with query characters",
-			str:     "",
-			strName: "str",
-			query: []rune{
-				'c',
-			},
-			errExpected: false,
-		},
+		{"empty string with empty query", "", "str", []rune{}, false},
+		{"string with empty query", "abc", "str", []rune{}, false},
+		{"no matching characters", "abc", "str", []rune{'d', 'e', 'f'}, false},
+		{"matching characters", "abc", "str", []rune{'c'}, true},
+		{"empty string with query", "", "str", []rune{'c'}, false},
 	}
-
-	// Run tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustNotContainAnyOf(tt.query)(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustNotContain() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustNotContain() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustNotContainAnyOf(tt.query), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Tests StringValidationOption MustBeValidEmailFormat()
 func TestMustBeValidEmailFormat(t *testing.T) {
-	// Test cases
 	tests := []struct {
 		name        string
 		str         string
 		strName     string
 		errExpected bool
 	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string without @",
-			str:         "abc",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string without username",
-			str:         "@abc.com",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string without domain",
-			str:         "abc@.com",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string without domain or extension",
-			str:         "abc@",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string without domain extension",
-			str:         "abc@abc",
-			strName:     "str",
-			errExpected: true,
-		},
-		{
-			name:        "string with valid email format",
-			str:         "test@email.com",
-			strName:     "str",
-			errExpected: false,
-		},
+		{"empty string", "", "str", true},
+		{"no @ symbol", "abc", "str", true},
+		{"no username", "@abc.com", "str", true},
+		{"no domain", "abc@.com", "str", true},
+		{"no domain or extension", "abc@", "str", true},
+		{"no domain extension", "abc@abc", "str", true},
+		{"valid email", "test@email.com", "str", false},
 	}
-
-	// Run tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := MustBeValidEmailFormat()(tt.str, tt.strName)
-
-			errFound := err != nil
-
-			if (errFound && !tt.errExpected) || (!errFound && tt.errExpected) {
-				t.Errorf("MustBeValidEmailFormat() error = %v, wantErr %v", err, tt.errExpected)
-			}
-
-			// Make sure the strName is in the error message
-			if errFound && tt.errExpected && !strings.Contains(err.Error(), tt.strName) {
-				t.Errorf("MustBeValidEmailFormat() strName error = %v, expected to contain strName %v", err, tt.strName)
-			}
+			assertOption(t, MustBeValidEmailFormat(), tt.str, tt.strName, tt.errExpected)
 		})
 	}
 }
 
-// Test ValidateStringWithName(str, strName string, options ...StringValidationOption) StringValidationResult
 func TestValidateStringWithName(t *testing.T) {
-	// Test cases
-	tests := []struct {
-		name        string
-		str         string
-		strName     string
-		expectValid bool
-	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			expectValid: false,
-		},
+	result := ValidateStringWithName("", "str", MustNotBeEmpty())
+	if result.Valid {
+		t.Error("expected invalid result for empty string")
 	}
-
-	// Run tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := ValidateStringWithName(tt.str, tt.strName, MustNotBeEmpty())
-
-			if result.Valid != tt.expectValid {
-				t.Errorf("ValidateStringWithName() IsValid = %v, want %v", result.Valid, tt.expectValid)
-			}
-
-			// Make sure the strName is in the first message
-			if len(result.Messages) > 0 && !strings.Contains(result.Messages[0], tt.strName) {
-				t.Errorf("ValidateStringWithName() strName error = %v, expected to contain strName %v", result.Messages[0], tt.strName)
-			}
-		})
+	if len(result.Messages) > 0 && !strings.Contains(result.Messages[0], "str") {
+		t.Errorf("message %q does not contain strName", result.Messages[0])
 	}
 }
 
-// Test ValidateString(str, strName string, options ...StringValidationOption) StringValidationResult
 func TestValidateString(t *testing.T) {
-	// Test cases
-	tests := []struct {
-		name        string
-		str         string
-		strName     string
-		expectValid bool
-	}{
-		{
-			name:        "empty string",
-			str:         "",
-			strName:     "str",
-			expectValid: false,
-		},
+	result := ValidateString("", MustNotBeEmpty())
+	if result.Valid {
+		t.Error("expected invalid result for empty string")
 	}
-
-	// Run tests
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := ValidateString(tt.str, MustNotBeEmpty())
-
-			if result.Valid != tt.expectValid {
-				t.Errorf("ValidateString() IsValid = %v, want %v", result.Valid, tt.expectValid)
-			}
-
-			// Make sure the first message starts with 'String'
-			if len(result.Messages) > 0 && !strings.HasPrefix(result.Messages[0], "String") {
-				t.Errorf("ValidateString() strName error = %v, expected to start with 'String'", result.Messages[0])
-			}
-		})
+	if len(result.Messages) > 0 && !strings.HasPrefix(result.Messages[0], "String") {
+		t.Errorf("message %q does not start with 'String'", result.Messages[0])
 	}
 }
